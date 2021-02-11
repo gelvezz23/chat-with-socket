@@ -2,54 +2,54 @@
 
 var socket = io();
 
-let params = new URLSearchParams(window.location.search);
+var params = new URLSearchParams(window.location.search);
 
 if (!params.has('nombre') || !params.has('sala')) {
 	window.location = 'index.html';
-	throw new Error('Es necesario que tenga un nombre y una sala');
+	throw new Error('El nombre y sala son necesarios');
 }
 
-let Usuario = {
+var usuario = {
 	nombre: params.get('nombre'),
 	sala: params.get('sala'),
 };
 
-socket.on('connect', function () {
+socket.on('connect', () => {
 	console.log('Conectado al servidor');
 
-	socket.emit('entrarChat', Usuario, (res) => {
-		console.log('usuario conectado', res);
+	socket.emit('entrarChat', usuario, (resp) => {
+		// console.log('Usuarios conectados', resp);
+		renderizarUsuarios(resp);
 	});
 });
 
 // escuchar
-socket.on('disconnect', function () {
+socket.on('disconnect', () => {
 	console.log('Perdimos conexión con el servidor');
 });
 
 // Enviar información
-// socket.emit(
-// 	'enviarMensaje',
-// 	{
-// 		usuario: 'Carlos',
-// 		mensaje: 'Hola Mundo',
-// 	},
-// 	function (resp) {
-// 		console.log('respuesta server: ', resp);
-// 	}
-// );
+// socket.emit('crearMensaje', {
+//     nombre: 'Fernando',
+//     mensaje: 'Hola Mundo'
+// }, function(resp) {
+//     console.log('respuesta server: ', resp);
+// });
 
 // Escuchar información
 socket.on('crearMensaje', (mensaje) => {
-	console.log('Servidor:', mensaje);
+	// console.log('Servidor:', mensaje);
+	renderizarMensaje(mensaje, false);
+	scrollBottom();
 });
 
-// Escuchar cuando un usuario entra o sale de el chat
-socket.on('listaPersonas', (personas) => {
-	console.log(personas);
+// Escuchar cambios de usuarios
+// cuando un usuario entra o sale del chat
+socket.on('listaPersona', (personas) => {
+	renderizarUsuarios(personas);
 });
 
-// Enviar un mensaje privado
-socket.on('mensajePrivado', (mensaje) => {
-	console.log('Mensaje privado : ', mensaje);
+// Mensajes privados
+socket.on('mensajePrivado', function (mensaje) {
+	console.log('Mensaje Privado:', mensaje);
 });
